@@ -14,7 +14,7 @@
                 card_no: '111'
             };
             getPersonInfo(params).then(res => {
-                console.log(res)
+                // console.log(res)
             })
         },
         data() {
