@@ -1,30 +1,28 @@
-import Vue from "vue";
 import axios from "axios";
 import qs from "qs";
 import app from "../main.js";
 
 
-const baseUrl = document.domain === 'localhost' || document.domain === 'yibaotest.runningdoctor.cn'
-    ? 'http://testapi.runningdoctor.cn/shebao-api'
-    : 'http://testapi.runningdoctor.cn/shebao-api';
-
-
 /****** 创建axios实例 ******/
 const service = axios.create({
-    baseURL: baseUrl,  // api的base_url
+    baseURL: process.env.BASE_URL,  // api的base_url
     timeout: 5000  // 请求超时时间
 });
 
 
-/****** request拦截器 ******/
+/****** request拦截器==>对请求参数做处理 ******/
 service.interceptors.request.use(config => {
+    app.$vux.loading.show({
+        text: '数据加载中……'
+    });
+
     config.method === 'post'
         ? config.data = qs.stringify({...config.data})
         : config.params = {...config.params};
     config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
     return config;
-}, error => {
+}, error => {  //请求错误处理
     app.$vux.toast.show({
         type: 'warn',
         text: error
@@ -33,25 +31,25 @@ service.interceptors.request.use(config => {
 });
 
 
-/****** respone拦截器 ******/
+/****** respone拦截器==>对响应做处理 ******/
 service.interceptors.response.use(
-    response => {
-        // console.log('response');
-        // console.log(response);
-        // console.log(JSON.stringify(response));
+    response => {  //成功请求到数据
+        app.$vux.loading.hide();
+
         if (response.data.result === 'TRUE') {
             return response.data;
         } else {
             app.$vux.toast.show({  //常规错误处理
                 type: 'warn',
-                text: '网络异常，请重试'
+                text: response.data.data.msg
             });
         }
     },
-    error => {
+    error => {  //响应错误处理
         console.log('error');
         console.log(error);
         console.log(JSON.stringify(error));
+
         let text = JSON.parse(JSON.stringify(error)).response.status === 404
             ? '404'
             : '网络异常，请重试';
@@ -59,6 +57,7 @@ service.interceptors.response.use(
             type: 'warn',
             text: text
         });
+
         return Promise.reject(error)
     }
 );

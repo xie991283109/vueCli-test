@@ -20,9 +20,10 @@ Vue.component('cell-box', CellBox);
 Vue.component('actionsheet', Actionsheet);
 
 
-/****** 全局处理错误提示 ******/
-import  { ToastPlugin } from 'vux'
+/****** 全局处理错误提示、数据加载 ******/
+import {ToastPlugin, LoadingPlugin} from 'vux'
 Vue.use(ToastPlugin);
+Vue.use(LoadingPlugin);
 
 
 Vue.config.productionTip = false;
